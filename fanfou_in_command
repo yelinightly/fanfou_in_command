@@ -12,39 +12,28 @@ def regx_iteration_function(weibo_content, weibo_time):
 	tweet_txt = weibo_time + '\n'
 
 	if(len(href)):
-
 		for i in range(len(href)):
 			x0 = href[i][0]
 			x1 = href[i][1]
 			x2 = href[i][2]
 			x3 = href[i][3]
-			x4 = href[i][4]
-			x5 = href[i][5]
-
-			if(x3 == 'former'):
-				# print 'REPOST:'+href[i][2]+'('+href[i][0]+')'+' said: '+href[i][3]
-				tweet_txt += x0
-				tweet_txt += x4
-				tweet_txt += '(' + x1 + ')'
-				tweet_txt += x5
-			# elif(x1 == 'photo zoom'):
-			elif(x3 == 'photo zoom'):
-				# print 'POST PHOTO: ('+href[i][0]+') and shared:'+href[i][3]
-				# list_photozoom = ['POST PHOTO: (', href[i][0], ') and shared:', href[i][3] ]
-				# list_photozoom = ['POST PHOTO: (', x0, ') and shared:', x3 ]
-				tweet_txt += x0
-				tweet_txt += 'PHOTO' + '(' + x1 + ')'
-				tweet_txt += x5
-			elif(x3 == '_blank'):
-				# print 'REPOST:'+href[i][2]+'('+href[i][0]+')'+' said: '+href[i][3]
-				tweet_txt += x0
-				tweet_txt += '(' + x1 + ')'
-				tweet_txt += x5
-			# elif(x1 == 'photo zoom'):
+			id_src = re_id.findall(x1)
+			if(len(id_src)):
+				element_url =  id_src[0][0]
+				tweet_type =  id_src[0][2]
+				if(tweet_type == 'former'):
+					id_url = x2+'('+element_url+')'
+					tweet_txt += x0+id_url+x3
+				elif(tweet_type == "photo zoom"):
+					img_url = 'Photo'+'('+element_url+')'
+					tweet_txt += x0+img_url+x3
+				elif(tweet_type == "_blank"):
+					tweet_txt += x0+x2+x3
+				else:
+					 print 'id_src error!\n'
 			else:
-				print 'other element'
-				print weibo_content
-		#print 'Repost: ' + tweet_txt + '\n'
+				tweet_txt += x0+x2+x3
+
 	else:
 		txt = re_direct.findall(weibo_content)
 		if(txt):
@@ -92,7 +81,6 @@ if __name__ == '__main__':
 			i=i+1
 		else:
 			page_name = raw_input('pls input the page number: ')
-			print repr(page_name)
 			if(page_name == 'q' or page_name == 'Q'):
 				exit()
 			elif(page_name == r'' or page_name == r'c'):
@@ -110,7 +98,10 @@ if __name__ == '__main__':
 
 		re_tweet = re.compile(r'<span class=\"content\">(.*?)stamp.*?class="time" title="(.*?)"')
 		re_direct = re.compile(r'(.*?)</span>')
-		re_notext = re.compile(r'(.*?)<a href="(.*?)".*?(class|target)="(.*?)".*?>(.*?)</a>(.*?)(?=<)')
+		# re_notext = re.compile(r'(.*?)<a href="(.*?)".*?(class|target)="(.*?)".*?>(.*?)</a>(.*?)(?=<)')
+		re_notext = re.compile(r'(.*?)<a([^>]*?)>(.*?)</a>(.*?)(?=<)')
+		# re_img = re.compile(r'(?<=src=)"+(.*?)"+.*?/')
+		re_id = re.compile(r'.*?href="(.*?)".*?(class=|target=)"(.*?)"')
 
 		fanfou_content = ''
 		fanfou_content = regx_function(xcontent)
